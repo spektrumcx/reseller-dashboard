@@ -202,6 +202,8 @@
         {{--    });--}}
         {{--});--}}
 
+            var isLoaded = false;
+
         $(document).ready(function () {
             let now = new Date();
             let firstDay = new Date(now.getFullYear(), now.getMonth(), 2);
@@ -238,7 +240,36 @@
                         d._token = '{{ csrf_token() }}';
                         d.date_range = selectedDateRange; // Send selected date range in AJAX request
                     },
+                    "dataSrc": function ( res ) {
+                        if (!isLoaded) {
+                            isLoaded = true;
+                            return true
+                        }
+                        if(res.status === 'error') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: res.message,
+                                confirmButtonText: 'OK'
+                            });
+
+                        }  if(res.status === 'info') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Warning',
+                                text: res.message,
+                                confirmButtonText: 'OK'
+                            });
+
+                        }
+                        if(res.status === 'success') {
+                            $('#reseller_name').text(res.reseller_name);
+                        }
+
+                    }
+
                 },
+
                 columns: [
                     {data: 'status_color'},
                     {data: 'booking_number'},

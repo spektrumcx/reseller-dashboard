@@ -38,6 +38,15 @@ class HomeController extends Controller
                 'message' => 'Reseller key is required.',
             ]);
         }
+        $bookings = Booking::where('reseller_key', $resellerKey)->get();
+
+        if ($bookings->isEmpty()) {
+            return response()->json([
+                'status' => 'info',
+                'message' => 'No bookings found for the provided reseller key.',
+            ]);
+        }
+
         // Handle DataTables AJAX request
         if ($request->has('draw')) {
 
@@ -48,6 +57,8 @@ class HomeController extends Controller
                 ->whereDate('check_in_date', '<=', $end);
             })
             ;
+
+
 
             return datatables()
                 ->eloquent($query)
@@ -83,14 +94,7 @@ class HomeController extends Controller
         }
 
         // Handle manual AJAX request
-        $bookings = Booking::where('reseller_key', $resellerKey)->get();
 
-        if ($bookings->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No bookings found for the provided reseller key.',
-            ]);
-        }
 
         $formattedBookings = $bookings->map(function ($booking) {
             return [

@@ -250,15 +250,17 @@
                                 icon: 'error',
                                 title: 'Error',
                                 text: res.message,
-                                confirmButtonText: 'OK'
+                                confirmButtonText: 'Ok'
+
                             });
 
-                        }  if(res.status === 'info') {
+                        }
+                        if(res.status === 'info') {
                             Swal.fire({
                                 icon: 'info',
-                                title: 'Warning',
+                                title: 'Info',
                                 text: res.message,
-                                confirmButtonText: 'OK'
+                                confirmButtonText: 'Ok'
                             });
 
                         }
@@ -266,10 +268,11 @@
                             $('#reseller_name').text(res.reseller_name);
                         }
 
+                        return res.data;
+
                     }
 
                 },
-
                 columns: [
                     {data: 'status_color'},
                     {data: 'booking_number'},

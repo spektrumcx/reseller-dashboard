@@ -3,6 +3,11 @@
     @lang('translation.dashboards')
 @endsection
 @section('content')
+    <style>
+        #bookingTable_filter {
+            /*display: none!important;*/
+        }
+    </style>
     <div class="p-4 mt-5">
         <div class="row">
             <div class="col-lg-12">
@@ -17,7 +22,7 @@
                     <div class="card-body border border-dashed border-end-0 border-start-0">
                         <form>
                             <div class="row g-3 justify-content-end">
-                                <div class="col-xxl-10 col-sm-10">
+                                <div class="col-xxl-6 col-sm-6">
                                     <div class="search-box">
                                         <input type="text" class="form-control search"
                                                value=""
@@ -26,10 +31,17 @@
                                     </div>
                                 </div>
 
+                                <div class="col-xxl-4 col-sm-4">
+                                    <div class="date-picker" id="date-picker">
+                                        <input type="text" class="form-control" placeholder="Select Date Range"
+                                               id="input"/>
+                                    </div>
+                                </div>
                                 <!--end col-->
                                 <div class="col-xxl-2 col-sm-2">
                                     <div>
-                                        <button type="button" class="btn btn-primary w-100" onclick="getBookings();">
+                                        <button type="button" class="btn btn-primary w-100"
+                                                onclick="getBookings();">
                                             Get Bookings
                                             <i class="ri-calendar-2-line me-1 align-bottom"></i>
                                         </button>
@@ -79,12 +91,6 @@
                                 <table class="table table-nowrap align-middle" id="bookingTable">
                                     <thead class="text-muted table-light">
                                     <tr class="text-uppercase">
-{{--                                        <th scope="col" style="width: 25px;">--}}
-{{--                                            <div class="form-check">--}}
-{{--                                                <input class="form-check-input" type="checkbox" id="checkAll"--}}
-{{--                                                       value="option">--}}
-{{--                                            </div>--}}
-{{--                                        </th>--}}
                                         <th>Status</th>
                                         <th>Booking Number</th>
                                         <th>Unit Name</th>
@@ -97,26 +103,28 @@
                                         <th>Action</th>
                                     </tr>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody>
+
+                                    </tbody>
                                 </table>
 
 
                             </div>
 
-                            <div class="d-flex justify-content-end">
-                                <div class="pagination-wrap hstack gap-2" style="display: flex;">
-                                    <a class="page-item pagination-prev disabled" href="#">
-                                        Previous
-                                    </a>
-                                    <ul class="pagination listjs-pagination mb-0">
-                                        <li class="active"><a class="page" href="#" data-i="1" data-page="8">1</a></li>
-                                        <li><a class="page" href="#" data-i="2" data-page="8">2</a></li>
-                                    </ul>
-                                    <a class="page-item pagination-next" href="#">
-                                        Next
-                                    </a>
-                                </div>
-                            </div>
+                            {{--                            <div class="d-flex justify-content-end">--}}
+                            {{--                                <div class="pagination-wrap hstack gap-2" style="display: flex;">--}}
+                            {{--                                    <a class="page-item pagination-prev disabled" href="#">--}}
+                            {{--                                        Previous--}}
+                            {{--                                    </a>--}}
+                            {{--                                    <ul class="pagination listjs-pagination mb-0">--}}
+                            {{--                                        <li class="active"><a class="page" href="#" data-i="1" data-page="8">1</a></li>--}}
+                            {{--                                        <li><a class="page" href="#" data-i="2" data-page="8">2</a></li>--}}
+                            {{--                                    </ul>--}}
+                            {{--                                    <a class="page-item pagination-next" href="#">--}}
+                            {{--                                        Next--}}
+                            {{--                                    </a>--}}
+                            {{--                                </div>--}}
+                            {{--                            </div>--}}
                         </div>
 
                     </div>
@@ -131,11 +139,95 @@
     {{--    <script src="{{ URL::asset('build/js/app.js') }}"></script>--}}
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script type="text/javascript">
+        let dtTable;
+        let selectedDateRange;
+
+        {{--$(document).ready(function () {--}}
+        {{--    let now = new Date();--}}
+        {{--    let firstDay = new Date(now.getFullYear(), now.getMonth(), 1);--}}
+        {{--    let lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);--}}
+
+        {{--    // Format dates as YYYY-MM-DD--}}
+        {{--    let firstDayStr = firstDay.toISOString().split('T')[0];--}}
+        {{--    let lastDayStr = lastDay.toISOString().split('T')[0];--}}
+
+        {{--    // Initialize Flatpickr with the date range--}}
+        {{--    flatpickr("#input", {--}}
+        {{--        mode: "range", // Enables date range selection--}}
+        {{--        dateFormat: "Y-m-d", // Format: YYYY-MM-DD--}}
+        {{--        defaultDate: [firstDayStr, lastDayStr], // Set initial value to current month's range--}}
+        {{--        onClose: function(selectedDates, dateStr) {--}}
+        {{--            alert("Selected Date Range: " + dateStr); // Show selected date range--}}
+        {{--        }--}}
+        {{--    });--}}
+
+
+
+        {{--    $('#date_range').val(moment().subtract(1, 'month').format('YYYY-MM-DD') + ' - ' + moment().format('YYYY-MM-DD'));--}}
+
+        {{--    dtTable = $('#bookingTable').DataTable({--}}
+        {{--        processing: true,--}}
+        {{--        serverSide: true,--}}
+        {{--        ajax: {--}}
+        {{--            url: '/getBookings',--}}
+        {{--            type: 'POST',--}}
+        {{--            data: function (d) {--}}
+        {{--                d.reseller_key = $('#reseller_key').val(); // Add reseller_key dynamically--}}
+        {{--                d._token = '{{ csrf_token() }}';--}}
+        {{--                d._dtpick = "123";--}}
+        {{--            },--}}
+        {{--        },--}}
+        {{--        columns: [--}}
+        {{--            // {searchable: false},--}}
+        {{--            // {data: 'status' , hidden: true},--}}
+        {{--            {data: 'status_color'},--}}
+        {{--            // {data: 'status_color'},--}}
+        {{--            {data: 'booking_number'},--}}
+        {{--            {data: 'room_name'},--}}
+        {{--            {data: 'hotel_name'},--}}
+        {{--            {data: 'customer_name'},--}}
+        {{--            {data: 'dates'},--}}
+        {{--            // {data: 'payment_status'},--}}
+        {{--            {data: 'payment_status_color'},--}}
+        {{--            {data: 'cost'},--}}
+        {{--            {data: 'source_type'},--}}
+        {{--            {data: 'action'},--}}
+        {{--        ],--}}
+        {{--        pageLength: 10,--}}
+
+        {{--        lengthMenu: [5, 10, 25, 50],--}}
+        {{--    });--}}
+        {{--});--}}
 
         $(document).ready(function () {
-            $('#bookingTable').DataTable({
+            let now = new Date();
+            let firstDay = new Date(now.getFullYear(), now.getMonth(), 2);
+            let lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+// Format dates as YYYY-MM-DD
+            let firstDayStr = firstDay.toISOString().split('T')[0];
+            let lastDayStr = lastDay.toISOString().split('T')[0];
+
+            // Store selected date range in a variable
+            selectedDateRange = firstDayStr + ' to ' + lastDayStr;
+
+            // Initialize Flatpickr with the date range
+            flatpickr("#input", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                defaultDate: [firstDayStr, lastDayStr],
+                onClose: function (selectedDates, dateStr) {
+                    selectedDateRange = dateStr; // Update the selected date range
+                    // alert("Selected Date Range: " + dateStr);
+                    dtTable.ajax.reload(); // Reload DataTable with the new date range
+                }
+            });
+
+            // Initialize DataTable
+            dtTable = $('#bookingTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
@@ -144,135 +236,31 @@
                     data: function (d) {
                         d.reseller_key = $('#reseller_key').val(); // Add reseller_key dynamically
                         d._token = '{{ csrf_token() }}';
+                        d.date_range = selectedDateRange; // Send selected date range in AJAX request
                     },
                 },
                 columns: [
-                    // {data: 'check', orderable: false, searchable: false},
-                    {data: 'status'},
+                    {data: 'status_color'},
                     {data: 'booking_number'},
-                    {data: 'unit_name'},
-                    {data: 'property_name'},
-                    {data: 'user_name'},
+                    {data: 'room_name'},
+                    {data: 'hotel_name'},
+                    {data: 'customer_name'},
                     {data: 'dates'},
-                    {data: 'payment_status'},
-                    {data: 'amount'},
-                    {data: 'source'},
+                    {data: 'payment_status_color'},
+                    {data: 'cost'},
+                    {data: 'source_type'},
+                    {data: 'action'},
                 ],
                 pageLength: 10,
-
                 lengthMenu: [5, 10, 25, 50],
             });
         });
 
-
         function getBookings() {
-            var reseller_key = $('#reseller_key').val();
-            $.ajax({
-                url: '/getBookings',
-                type: 'POST',
-                data: {
-                    reseller_key: reseller_key,
-                    _token: '{{ csrf_token() }}',
-                },
-                success: function (response) {
-                    if (response.status == 'success') {
-                        var bookings = response.bookings;
-                        console.log(bookings)
-                        $('#reseller_name').text('Welcome ' + bookings[0].reseller_name + " !");
-                        // 'status' => ucfirst($booking->status),
-                        //     'room_name' => $booking->room_name,
-                        //     'hotel_name' => $booking->hotel_name,
-                        //     'customer_name' => $booking->customer_name,
-                        //     'dates' => $booking->dates,
-                        //     'payment_status' => ucfirst($booking->payment_status),
-                        //     'cost' => $booking->cost,
-                        //     'source_type' => $booking->source_type,
-                        var html = '';
-                        for (var i = 0; i < bookings.length; i++) {
-                            var booking = bookings[i];
-                            html += '<tr>';
-                            // html += '<th scope="row">';
-                            // // html += '<div class="form-check">';
-                            // // html += '<input class="form-check-input" type="checkbox" name="checkAll" value="option1">';
-                            // // html += '</div>';
-                            // html += '</th>';
-                            html += '<td class="status"><span class="badge text-uppercase" style="background-color: ' + booking.status_color + ';">' + booking.status + '</span></td>';
-                            html += '<td class="booking_number">' + booking.booking_number + '</td>';
-                            html += '<td class="unit_name">' + booking.room_name + '</td>';
-                            html += '<td class="property_name">' + booking.hotel_name + '</td>';
-                            html += '<td class="user_name">' + booking.customer_name + '</td>';
-                            html += '<td class="dates">' + booking.dates + '</td>';
-                            html += '<td class="payment_status"><span class="badge text-uppercase" style="background-color: ' + booking.payment_status_color + ';">' + booking.payment_status + '</span></td>';
-                            html += '<td class="amount">' + booking.cost + '</td>';
-                            html += '<td class="source">' + booking.source_type + '</td>';
-                            // add dropdown of marked paid or unpaid
-                            html += '<td class="action">';
-                            html += '<div class="dropdown">';
-                            html += '<button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">';
-                            html += 'Action';
-                            html += '</button>';
-                            html += '<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">';
-                            html += '<li><a class="dropdown-item" href="#">Mark as Paid</a></li>';
-                            html += '<li><a class="dropdown-item" href="#">Mark as Unpaid</a></li>';
-                            html += '</ul>';
-                            html += '</div>';
-                            html += '</td>';
-                            html += '</tr>';
-                        }
-                        $('#bookingTable tbody').html(html);
-                    } else {
-                        console.error(response.message);
-                        $('#bookingTable').DataTable().clear().draw(); // Clear the DataTable
-                        Swal.fire({
-                            title: 'Warning!',
-                            text: response.message,
-                            icon: 'warning',
-                            confirmButtonText: 'Retry'
-                        })
-                    }
-                },
-            });
+            if (dtTable) {
+                dtTable.ajax.reload(null, false); // false = retain current pagination
+            }
         }
-
-
-        {{--function getBookings(){--}}
-        {{--    var reseller_key = $('#reseller_key').val();--}}
-        {{--    $.ajax({--}}
-        {{--        url: '/getBookings',--}}
-        {{--        type: 'POST',--}}
-        {{--        data: {--}}
-        {{--            reseller_key: reseller_key,--}}
-        {{--            _token: '{{ csrf_token() }}'--}}
-        {{--        },--}}
-        {{--        success: function (response) {--}}
-        {{--            console.log(response);--}}
-        {{--            if(response.status == 'success'){--}}
-        {{--                var bookings = response.bookings;--}}
-        {{--                var html = '';--}}
-        {{--                for(var i = 0; i < bookings.length; i++){--}}
-        {{--                    var booking = bookings[i];--}}
-        {{--                    html += '<tr>';--}}
-        {{--                    html += '<th scope="row">';--}}
-        {{--                    html += '<div class="form-check">';--}}
-        {{--                    html += '<input class="form-check-input" type="checkbox" name="checkAll" value="option1">';--}}
-        {{--                    html += '</div>';--}}
-        {{--                    html += '</th>';--}}
-        {{--                    html += '<td class="status"><span class="badge bg-success-subtle text-success text-uppercase">'+booking.status+'</span></td>';--}}
-        {{--                    html += '<td class="created_at">'+booking.created_at+'</td>';--}}
-        {{--                    html += '<td class="unit_name">'+booking.unit_name+'</td>';--}}
-        {{--                    html += '<td class="property_name">'+booking.property_name+'</td>';--}}
-        {{--                    html += '<td class="user_name">'+booking.user_name+'</td>';--}}
-        {{--                    html += '<td class="dates">'+booking.dates+'</td>';--}}
-        {{--                    html += '<td class="payment_status"><span class="badge bg-warning-subtle text-warning text-uppercase">'+booking.payment_status+'</span></td>';--}}
-        {{--                    html += '<td class="amount">'+booking.amount+'</td>';--}}
-        {{--                    html += '<td class="source">'+booking.source+'</td>';--}}
-        {{--                    html += '</tr>';--}}
-        {{--                }--}}
-        {{--                $('#bookingTable tbody').html(html);--}}
-        {{--            }--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--}--}}
 
     </script>
 @endsection

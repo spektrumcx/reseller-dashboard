@@ -123,7 +123,7 @@ class HomeController extends Controller
     public function bookings_sync_manual(Request $request)
     {
         try {
-            
+
             $reseller = $request->data['reseller'];
             $bookings = $request->data['bookings'];
 
@@ -131,7 +131,10 @@ class HomeController extends Controller
 //        dd($bookings);
             foreach ($bookings as $booking) {
                 DB::table('bookings')->updateOrInsert(
-                    ['booking_id' => $booking['booking_id']], // Condition to check for existing record
+                    [
+                        'booking_id' => $booking['booking_id'],
+                        'hotel_name' => $booking['hotel_name'],
+                    ], // Condition to check for existing record
                     [
                         'booking_number' => $booking['booking_number'],
                         'code' => $booking['code'],

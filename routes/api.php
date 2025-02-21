@@ -19,3 +19,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/bookings-sync', [App\Http\Controllers\HomeController::class, 'bookings_sync'])->name('bookings.sync');
+Route::post('/bookings-sync-manual', [App\Http\Controllers\HomeController::class, 'bookings_sync_manual'])->name('bookings.sync')->middleware('throttle:999,1');;

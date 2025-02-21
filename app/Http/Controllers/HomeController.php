@@ -120,6 +120,74 @@ class HomeController extends Controller
         ]);
     }
 
+    public function bookings_sync_manual(Request $request)
+    {
+        try {
+            echo 'asdfafd';
+            return true;
+
+//            $bb = Booking::all();
+//            return response()->json([
+//                'status' => 'success',
+//                'message' => 'Bookings synced successfully.',
+//                'bookings' => $bb,
+//            ]);
+//            // WRITE INTO FILE
+//            $file = fopen("bookings.txt", "w") or die("Unable to open file!");
+//            fwrite($file, json_encode($request->data));
+//            fclose($file);
+
+            $reseller = $request->data['reseller'];
+            $bookings = $request->data['bookings'];
+
+
+//        dd($bookings);
+            foreach ($bookings as $booking) {
+                DB::table('bookings')->updateOrInsert(
+                    ['booking_id' => $booking['booking_id']], // Condition to check for existing record
+                    [
+                        'booking_number' => $booking['booking_number'],
+                        'code' => $booking['code'],
+                        'cost' => $booking['cost'],
+                        'cost_symbol' => $booking['cost_symbol'],
+                        'country_flag' => $booking['country_flag'],
+                        'customer_name' => $booking['customer_name'],
+                        'dates' => $booking['dates'],
+                        'formatted_cost' => $booking['formatted_cost'],
+                        'guests_count' => $booking['guests_count'],
+                        'hotel_name' => $booking['hotel_name'],
+                        'nights' => $booking['nights'],
+                        'payment_status' => $booking['payment_status'],
+                        'payment_status_color' => $booking['payment_status_color'],
+                        'reseller_id' => $booking['reseller_id'],
+                        'resource_id' => (string)$booking['resource_id'],
+                        'room_name' => $booking['room_name'],
+                        'source_type' => $booking['source_type'],
+                        'status' => $booking['status'],
+                        'status_color' => $booking['status_color'],
+                        'status_value' => $booking['status_value'],
+                        'updated_at' => now(),
+                        'reseller_name' => $reseller['name'] ?? null,
+                        'reseller_key' => $reseller['key'] ?? null,
+                        'check_in_date' => $booking['check_in_date'],
+                        'check_out_date' => $booking['check_out_date'],
+                        'booking_created_at' => $booking['booking_created_at']
+                    ]
+                );
+            }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bookings synced successfully.',
+        ]);
+        }catch (\Exception $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+        }
+    }
     public function bookings_sync(Request $request)
     {
         $bookings = $request->input('bookings');

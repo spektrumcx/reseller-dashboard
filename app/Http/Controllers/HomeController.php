@@ -123,20 +123,7 @@ class HomeController extends Controller
     public function bookings_sync_manual(Request $request)
     {
         try {
-            echo 'asdfafd';
-            return true;
-
-//            $bb = Booking::all();
-//            return response()->json([
-//                'status' => 'success',
-//                'message' => 'Bookings synced successfully.',
-//                'bookings' => $bb,
-//            ]);
-//            // WRITE INTO FILE
-//            $file = fopen("bookings.txt", "w") or die("Unable to open file!");
-//            fwrite($file, json_encode($request->data));
-//            fclose($file);
-
+            
             $reseller = $request->data['reseller'];
             $bookings = $request->data['bookings'];
 
